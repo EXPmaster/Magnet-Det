@@ -37,7 +37,7 @@ class MagnetDataset(Dataset):
 
 def train_test_split(dataset_path, ratio=0.7):
     datalist = os.listdir(dataset_path)
-    datalist = list(filter(lambda x: x.endswith('Ori.png'), datalist))
+    datalist = list(filter(lambda x: x.endswith('Ori.png') and int(x.split('_')[2]) > 5, datalist))
     print(len(datalist))
     data_names = list(map(lambda x: '_'.join(x.split('_')[:-1]), datalist))
     train_len = int(len(data_names) * ratio)
@@ -47,9 +47,9 @@ def train_test_split(dataset_path, ratio=0.7):
 
 if __name__ == '__main__':
     trainset, testset = train_test_split('./data/dataset')
-    dataset = MagnetDataset(trainset)
-    data, label = next(iter(dataset))
-    print(data.shape, label.shape)
+    # dataset = MagnetDataset(trainset)
+    # data, label = next(iter(dataset))
+    # print(data.shape, label.shape)
     assert False
     cv2.imwrite('tmp_raw.png', label)
     # data: 512 * 512 * 3
