@@ -4,6 +4,7 @@
 *.pt
 *.pth
 *.swp
+*.png
 exp/
 data/
 weights/

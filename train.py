@@ -96,7 +96,7 @@ def save_results(args, loader, model):
 
 def main(args):
     model = UNet(n_channels=1, n_classes=args.classes, bilinear=args.bilinear).to(args.device)
-    loss_fn = nn.L1Loss()  # nn.MSELoss() # nn.BCELoss()
+    loss_fn = nn.L1Loss()  # nn.SmoothL1Loss()  # nn.L1Loss()  # nn.MSELoss() # nn.BCELoss()
     metric_fn = nn.L1Loss()  # nn.MSELoss()
     # optimizer = optim.RMSprop(model.parameters(), lr=args.lr, weight_decay=1e-8, momentum=0.9)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -109,7 +109,7 @@ def main(args):
     train_loader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
     test_loader = DataLoader(testset, batch_size=args.batch_size, num_workers=4, pin_memory=True)
 
-    best_metric = 0.01
+    best_metric = 0.015
     for i in range(args.epochs):
         train(i, args, train_loader, model, loss_fn, optimizer)
         metric = evaluate(i, args, test_loader, model, metric_fn)
@@ -133,14 +133,14 @@ def get_args():
     parser.add_argument('--data-path', default='./data/dataset', type=str)
     parser.add_argument('--output-path', default='./data/outputs', type=str)
     parser.add_argument('--weight-path', default='./weights', type=str)
-    parser.add_argument('--epochs', '-e', type=int, default=30, help='Number of epochs')
+    parser.add_argument('--epochs', '-e', type=int, default=50, help='Number of epochs')
     parser.add_argument('--imgsz', type=tuple, default=(512, 512), help='Image size')
     parser.add_argument('--batch-size', '-b', type=int, default=4, help='Batch size')
     parser.add_argument('--lr', '-l', type=float, default=1e-4, help='Learning rate')
     parser.add_argument('--load', '-f', type=str, default=False, help='Load model from a .pth file')
     parser.add_argument('--scale', '-s', type=float, default=0.5, help='Downscaling factor of the images')
     parser.add_argument('--amp', action='store_true', default=False, help='Use mixed precision')
-    parser.add_argument('--bilinear', action='store_true', default=False, help='Use bilinear upsampling')
+    parser.add_argument('--bilinear', action='store_true', default=True, help='Use bilinear upsampling')
     parser.add_argument('--classes', '-c', type=int, default=1, help='Number of channels')
     parser.add_argument('--gpus', type=str, default='0')
 
