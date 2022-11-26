@@ -69,7 +69,7 @@ def infer(args):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-path', default='./data/dataset', type=str)
-    parser.add_argument('--output-path', default='./data/outputs_infer', type=str)
+    parser.add_argument('--output-path', default='./data/outputs_1', type=str)
     parser.add_argument('--weight-path', default='./weights/best.pt', type=str)
     parser.add_argument('--imgsz', type=tuple, default=(512, 512), help='Image size')
     parser.add_argument('--scale', '-s', type=float, default=0.5, help='Downscaling factor of the images')
