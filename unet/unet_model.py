@@ -6,24 +6,23 @@ from .unet_parts import *
 class ConcatLayer(nn.Module):
     def __init__(self, in_dim):
         super().__init__()
-        self.data_ebd = nn.Linear(4, 128)
+        self.data_ebd = nn.Linear(7, 256)
+        self.conv = nn.Conv2d(in_dim, 128, kernel_size=1, bias=False)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.Linear(in_dim + 128, 1024),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(1024, 512),
+            nn.Linear(512, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(512, 4)
+            nn.Linear(512, 6),
+            nn.Sigmoid()
         )
 
     def forward(self, img, data):
         data = self.data_ebd(data)
-        img = self.pool(img).view(data.shape[0], -1)
-        concat_x = torch.cat((img, data), 1)
-        return self.fc(concat_x)
+        # img = self.pool(self.conv(img)).view(data.shape[0], -1)
+        # concat_x = torch.cat((img, data), 1)
+        return self.fc(data)
 
 
 class UNet(nn.Module):
@@ -52,7 +51,7 @@ class UNet(nn.Module):
         x3 = self.down2(x2)
         x4 = self.down3(x3)
         x5 = self.down4(x4)
-        out_txt_feature = self.outt(x5.detach(), data)
+        out_txt_feature = self.outt(x5.detach(), data)  # self.outt(x5.detach(), data)
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)

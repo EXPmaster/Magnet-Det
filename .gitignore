@@ -1,8 +1,6 @@
 .ipynb_checkpoints
 .DS_Store
 *.pkl
-*.pt
-*.pth
 *.swp
 *.png
 exp/

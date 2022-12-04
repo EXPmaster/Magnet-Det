@@ -1,4 +1,5 @@
 # Magnetic field generation
+Authors: Manwen Liao, Heng Zhang
 
 ## Requirements
 ```

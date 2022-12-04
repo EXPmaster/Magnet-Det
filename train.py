@@ -55,7 +55,7 @@ def train(epoch, args, loader, model, loss_fn1, loss_fn2, optimizer):
 
 
 @torch.no_grad()
-def evaluate(epoch, args, loader, model, metric_fn, txt_eval_fn):
+def evaluate(epoch, args, loader, model, metric_fn):
     model.eval()
     metric_img = AverageMeter()
     metric_txt = AverageMeter()
@@ -65,7 +65,7 @@ def evaluate(epoch, args, loader, model, metric_fn, txt_eval_fn):
         data = data.unsqueeze(1)
         predict_img, predict_txt = model(data, data_txt)
         loss_img = metric_fn(predict_img.flatten(1), label.flatten(1))
-        loss_txt = txt_eval_fn(predict_txt, label_txt)
+        loss_txt = torch.abs(predict_txt - label_txt).mean()
         metric_img.update(loss_img.item())
         metric_txt.update(loss_txt.item())
     print(f'Average evaluation Error => IMG: {metric_img.getval()}, TXT: {metric_txt.getval()}')
@@ -119,7 +119,7 @@ def main(args):
     best_metric = 0.015
     for i in range(args.epochs):
         train(i, args, train_loader, model, loss_fn1, loss_fn2, optimizer)
-        metric = evaluate(i, args, test_loader, model, metric_fn, loss_fn2)
+        metric = evaluate(i, args, test_loader, model, metric_fn)
         scheduler.step(metric)
 
         if metric < best_metric:
@@ -137,7 +137,7 @@ def main(args):
 
 def get_args():
     parser = argparse.ArgumentParser(description='Train the UNet on images and target masks')
-    parser.add_argument('--data-path', default='./data/dataset', type=str)
+    parser.add_argument('--data-path', default='./data/dataset_new', type=str)
     parser.add_argument('--output-path', default='./data/outputs', type=str)
     parser.add_argument('--weight-path', default='./weights', type=str)
     parser.add_argument('--epochs', '-e', type=int, default=40, help='Number of epochs')

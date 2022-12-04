@@ -15,28 +15,26 @@ class MagnetDataset(Dataset):
         self.imgsz = imgsz
 
     def __getitem__(self, idx):
-        data_name = os.path.join('./data/dataset', self.data_list[idx] + self.suffix_data)
-        label_name = os.path.join('./data/dataset', self.data_list[idx] + self.suffix_label)
-        txt_name = os.path.join('./data/dataset', self.data_list[idx] + self.suffix_txt)
+        data_name = os.path.join('./data/dataset_new', self.data_list[idx] + self.suffix_data)
+        label_name = os.path.join('./data/dataset_new', self.data_list[idx] + self.suffix_label)
+        txt_name = os.path.join('./data/dataset_new', self.data_list[idx] + self.suffix_txt)
 
-        basic_info = self.data_list[idx].split('_')[1:5]
+        basic_info = self.data_list[idx].split('_')[1:8]
         with open(txt_name, 'r') as f:
             string = f.readline().strip().split(',')
-        basic_info = list(map(lambda x: int(x), basic_info))
-        target = [float(string[x]) for x in [3, 4, 6, 7]]
+        basic_info = np.array(list(map(lambda x: int(x), basic_info)))
         target = [
-            (float(string[3]) - 4.88904552e-10) / 7.19262927e-10,
-            (float(string[4]) - 5.07338522e-03) / 8.10170913e-03,
-            (float(string[6]) - 7.54593045e+01) / 4.62108326e+01,
-            (float(string[7]) - 8.66012107e+01) / 1.38539718e+02
+            (float(string[3]) - 2.9278e-08) / (6.3442e-05 - 2.9278e-08),
+            (float(string[4]) - 6.5287e-07) / (4.6380e-02 - 6.5287e-07),
+            (float(string[6]) - 4.9272e+00) / (3.6427e+02 - 4.9272e+00),
+            (float(string[7]) - 3.7756e-03) / (1.2194e+03 - 3.7756e-03),
+            (float(string[12]) - 1.49683161e-05) / (1.33987507e-02 - 1.49683161e-05),
+            (float(string[14]) - 1.22639357e-12) / (4.75949139e-09 - 1.22639357e-12)
         ]
         img = cv2.imread(data_name, 0)[50:-50, 50:-50]
         label = cv2.imread(label_name, 0)[50:-50, 50:-50]
-        # label = 255 - label
-        # label = (label.astype(np.float) - img.astype(np.float))
         label = img - label
         # cv2.imwrite('tmp.png', label)
-        # assert False
         img = cv2.resize(img, self.imgsz) / 255.0
         label = cv2.resize(label, self.imgsz) / 255.0
         # img = img.transpose(2, 0, 1) / 255.0
@@ -49,10 +47,6 @@ class MagnetDataset(Dataset):
             torch.tensor(label, dtype=torch.float32),
             torch.tensor(target, dtype=torch.float32)
         )
-        # return (
-        #     torch.tensor(img, dtype=torch.float32),
-        #     torch.tensor(label, dtype=torch.float32),
-        # )
 
     def __len__(self):
         return len(self.data_list)
@@ -69,20 +63,20 @@ def train_test_split(dataset_path, ratio=0.7):
 
 
 if __name__ == '__main__':
-    trainset, testset = train_test_split('./data/dataset')
+    trainset, testset = train_test_split('./data/dataset_new')
     targets = []
     for item in trainset:
-        d_path = os.path.join('./data/dataset', item + '_TabSave.txt')
+        d_path = os.path.join('./data/dataset_new', item + '_TabSave.txt')
         basic_info = item.split('_')[1:5]
         with open(d_path, 'r') as f:
             string = f.readline().strip().split(',')
         basic_info = list(map(lambda x: float(x), basic_info))
-        target = [float(string[x]) for x in [3, 4, 6, 7]]
+        target = [float(string[x]) for x in [3, 4, 6, 7, 12, 14]]
         targets.append(target)
     targets = np.array(targets)
     print(targets.shape)
-    print(np.mean(targets, 0))
-    print(np.std(targets, 0))
+    print(np.max(targets, 0))
+    print(np.min(targets, 0))
     # dataset = MagnetDataset(trainset)
     # data, data2, label, label2 = next(iter(dataset))
     # print(data2, label2)
